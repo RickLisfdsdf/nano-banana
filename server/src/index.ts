@@ -29,7 +29,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
 
   try {
     // 1. 调用 Gemini 1.5 Flash 优化用户的描述词
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
     const systemInstruction = `你是一个专业的 AI 绘图提示词优化专家。
 请将用户的描述词转化为一段详细的、充满艺术感的英文绘图提示词(Prompt)。
