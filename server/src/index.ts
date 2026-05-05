@@ -1,25 +1,16 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import OpenAI from 'openai';
-
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
 
+// 跨域设置：允许前端访问
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: process.env.FRONTEND_URL || '*', // * 代表允许所有来源
   credentials: true
 }));
 
 app.use(express.json());
-
-// 初始化 MiMo
-const mimo = new OpenAI({
-  apiKey: process.env.MIMO_API_KEY,
-  baseURL: process.env.MIMO_BASE_URL || 'https://api.ai.xiaomi.com/v1',
-});
 
 app.post('/api/generate-image', async (req: Request, res: Response) => {
   const { prompt } = req.body;
@@ -31,69 +22,40 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   }
 
   try {
-    console.log(`收到用户请求: ${prompt}`);
+    console.log(`正在为描述词生成图片: ${prompt}`);
 
-    // 调用 MiMo 优化提示词
-    const completion = await mimo.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: "You are a professional image prompt expert. Optimize the user input into a detailed English prompt for AI drawing."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      model: "mimo-v2.5-pro",
-    }).catch((e: any) => {
-      // 输出 MiMo 返回的具体错误
-      console.error("MiMo 接口返回了具体错误:", e.status, e.message, e.error);
-      throw e;
-    });
+    // 编码描述词
+    const encodedPrompt = encodeURIComponent(prompt);
 
-    const optimizedPrompt =
-      completion.choices[0].message.content?.trim() || prompt;
+    // 随机 seed 确保每次生成不同
+    const randomSeed = Math.floor(Math.random() * 99999);
 
-    console.log(`MiMo 优化后提示词: ${optimizedPrompt}`);
+    // Pollinations 免费绘图接口
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${randomSeed}`;
 
-    // 正常绘图
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-      optimizedPrompt
-    )}?width=1024&height=1024&nologo=true&seed=${Math.floor(
-      Math.random() * 1000
-    )}`;
-
+    // 返回结果给前端
     res.json({
       success: true,
-      originalPrompt: prompt,
-      optimizedPrompt,
+      message: '图片生成成功',
+      prompt,
       imageUrl
     });
 
-  } catch (error: any) {
-    console.error('最终捕获报错:', error.message);
+  } catch (error) {
+    console.error('生成出错:', error);
 
-    // 保底方案：MiMo 不可用则直接原始提示词绘图
-    const fallbackUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(
-      prompt
-    )}?width=1024&height=1024&nologo=true&seed=${Math.floor(
-      Math.random() * 1000
-    )}`;
-
-    res.json({
+    res.status(500).json({
       success: false,
-      imageUrl: fallbackUrl,
-      originalPrompt: prompt,
-      message: "MiMo 暂时不可用，已为您直接绘图"
+      error: '生成失败，请重试'
     });
   }
 });
 
+// 健康检查
 app.get('/', (req: Request, res: Response) => {
-  res.send('Nano Banana API (MiMo Backup Mode) is running! 🍌');
+  res.send('🍌 Nano Banana API (纯净版) 正在运行！');
 });
 
 app.listen(port, () => {
-  console.log(`Server running with MiMo on ${port}`);
+  console.log(`服务器启动于端口 ${port}`);
 });
