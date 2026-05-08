@@ -7,6 +7,15 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config();
 
+// --- 全局错误捕获，防止进程崩溃 ---
+process.on('uncaughtException', (err) => {
+  console.error('🔥 未捕获的异常:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('🔥 未处理的 Promise 拒绝:', reason);
+});
+
 const app = express();
 const port = process.env.PORT || 3001;
 
@@ -16,19 +25,14 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// --- 初始化各个模型客户端 ---
-
-// 1. MiMo (Xiaomi)
+// --- 初始化模型客户端 ---
 const mimo = new OpenAI({
   apiKey: process.env.MIMO_API_KEY || 'no-key',
   baseURL: process.env.MIMO_BASE_URL || 'https://api.ai.xiaomi.com/v1',
 });
 
-// 2. Gemini
-// 指定使用 v1 版本以避免 v1beta 可能出现的 404 问题
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
-// 3. DeepSeek (示例：同样使用 OpenAI SDK)
 const deepseek = new OpenAI({
   apiKey: process.env.DEEPSEEK_API_KEY || 'no-key',
   baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
@@ -62,7 +66,6 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       optimizedPrompt = choice?.message.content?.trim() || prompt;
 
     } else if (usedModel === 'gemini') {
-      // 切换到 gemini-1.5-flash-latest，这是一个更稳定的别名
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
       const result = await model.generateContent(`${SYSTEM_INSTRUCTION}\n\n用户描述词: ${prompt}`);
       optimizedPrompt = result.response.text().trim() || prompt;
@@ -79,14 +82,11 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       optimizedPrompt = choice?.message.content?.trim() || prompt;
     }
 
-    console.log(`优化结果: ${optimizedPrompt}`);
-
   } catch (error: any) {
     console.error(`模型 ${usedModel} 优化出错:`, error.message);
     optimizationError = error.message;
   }
 
-  // --- 生成图片阶段 ---
   try {
     const encodedPrompt = encodeURIComponent(optimizedPrompt);
     const randomSeed = Math.floor(Math.random() * 100000);
@@ -109,8 +109,9 @@ app.get('/', (_req: Request, res: Response) => {
   res.send('🍌 Nano Banana Multi-Model API 正在运行！');
 });
 
-app.listen(Number(port), '0.0.0.0', () => {
+// 监听端口，增加对 Render 的兼容性支持
+const serverPort = typeof port === 'string' ? parseInt(port, 10) : port;
+app.listen(serverPort, '0.0.0.0', () => {
   console.log(`🚀 Nano Banana Backend is running!`);
-  console.log(`📡 Listening on: 0.0.0.0:${port}`);
-  console.log(`🛠️ Mode: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📡 Listening on: 0.0.0.0:${serverPort}`);
 });
