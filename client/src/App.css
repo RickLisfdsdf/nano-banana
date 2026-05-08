@@ -25,41 +25,76 @@ body {
 
 .header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 .header h1 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
   color: var(--accent-color);
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.version-tag {
+  font-size: 0.9rem;
+  background: var(--secondary-color);
+  color: var(--primary-color);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  vertical-align: middle;
 }
 
 .header p {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   color: #666;
-}
-
-.main-content {
-  flex: 1;
 }
 
 .input-section {
   background: white;
   padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.2rem;
+}
+
+.model-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: #f0f0f0;
+  padding: 0.4rem;
+  border-radius: 10px;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 0.6rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.85rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.tab-button.active {
+  background: white;
+  color: var(--active-color);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 textarea {
   width: 100%;
   padding: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  border: 2px solid #eee;
+  border-radius: 10px;
   font-size: 1rem;
   resize: vertical;
   box-sizing: border-box;
@@ -68,34 +103,24 @@ textarea {
 
 textarea:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--primary-color);
 }
 
-button {
+.generate-button {
   background-color: var(--primary-color);
   color: var(--secondary-color);
   border: none;
-  padding: 1rem 2rem;
+  padding: 1rem;
   font-size: 1.1rem;
   font-weight: bold;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: transform 0.2s, background-color 0.2s;
+  transition: all 0.2s;
 }
 
-button:hover:not(:disabled) {
+.generate-button:hover:not(:disabled) {
   background-color: var(--accent-color);
   transform: translateY(-2px);
-}
-
-button:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-button:disabled {
-  background-color: #eee;
-  cursor: not-allowed;
-  opacity: 0.7;
 }
 
 .error-message {
@@ -107,58 +132,57 @@ button:disabled {
   text-align: center;
 }
 
+.info-message {
+  background-color: #e3f2fd;
+  color: #1976d2;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.optimized-prompt-box {
+  background: #fdfae6;
+  border-left: 4px solid var(--accent-color);
+  padding: 1rem;
+  margin: 1rem 0;
+  text-align: left;
+  border-radius: 0 8px 8px 0;
+}
+
 .result-section {
   background: white;
-  min-height: 300px;
+  min-height: 400px;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
-  padding: 1rem;
-}
-
-.image-wrapper {
-  width: 100%;
-  text-align: center;
+  padding: 1.5rem;
 }
 
 .image-wrapper img {
   max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
-.image-caption {
-  margin-top: 1rem;
-  font-style: italic;
-  color: #777;
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-.placeholder {
-  color: #aaa;
-  text-align: center;
-}
-
-.skeleton-loader {
-  width: 100%;
-  height: 400px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  border-radius: 8px;
-}
-
-@keyframes loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .footer {
   margin-top: 3rem;
   text-align: center;
   color: #999;
-  font-size: 0.9rem;
 }
