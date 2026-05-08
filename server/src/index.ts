@@ -25,6 +25,7 @@ const mimo = new OpenAI({
 });
 
 // 2. Gemini
+// 指定使用 v1 版本以避免 v1beta 可能出现的 404 问题
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
 // 3. DeepSeek (示例：同样使用 OpenAI SDK)
@@ -36,7 +37,7 @@ const deepseek = new OpenAI({
 const SYSTEM_INSTRUCTION = "你是一个专业的 AI 绘图提示词优化专家。请将用户的描述词转化为一段详细的、充满艺术感的英文绘图提示词(Prompt)。只需返回优化后的英文内容，不要有任何其他解释。";
 
 app.post('/api/generate-image', async (req: Request, res: Response) => {
-  const { prompt, modelType } = req.body; // modelType: 'mimo', 'gemini', 'deepseek', 'none'
+  const { prompt, modelType } = req.body; 
 
   if (!prompt) {
     return res.status(400).json({ error: '请输入描述词！' });
@@ -61,7 +62,8 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
       optimizedPrompt = choice?.message.content?.trim() || prompt;
 
     } else if (usedModel === 'gemini') {
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // 切换到 gemini-1.5-flash-latest，这是一个更稳定的别名
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
       const result = await model.generateContent(`${SYSTEM_INSTRUCTION}\n\n用户描述词: ${prompt}`);
       optimizedPrompt = result.response.text().trim() || prompt;
 
@@ -84,7 +86,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
     optimizationError = error.message;
   }
 
-  // --- 生成图片阶段 (Pollinations AI) ---
+  // --- 生成图片阶段 ---
   try {
     const encodedPrompt = encodeURIComponent(optimizedPrompt);
     const randomSeed = Math.floor(Math.random() * 100000);
