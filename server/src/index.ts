@@ -1,4 +1,5 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
+import type { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import OpenAI from 'openai';
@@ -42,7 +43,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   }
 
   let optimizedPrompt = prompt;
-  let usedModel = modelType || 'none';
+  let usedModel = (modelType as string) || 'none';
   let optimizationError = null;
 
   try {
@@ -56,7 +57,8 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
         ],
         model: process.env.MIMO_MODEL || "mimo-v2.5-pro",
       });
-      optimizedPrompt = completion.choices[0].message.content?.trim() || prompt;
+      const choice = completion.choices[0];
+      optimizedPrompt = choice?.message.content?.trim() || prompt;
 
     } else if (usedModel === 'gemini') {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -71,7 +73,8 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
         ],
         model: "deepseek-chat",
       });
-      optimizedPrompt = completion.choices[0].message.content?.trim() || prompt;
+      const choice = completion.choices[0];
+      optimizedPrompt = choice?.message.content?.trim() || prompt;
     }
 
     console.log(`优化结果: ${optimizedPrompt}`);
@@ -79,7 +82,6 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error(`模型 ${usedModel} 优化出错:`, error.message);
     optimizationError = error.message;
-    // 出错时保持 original prompt，不中断流程
   }
 
   // --- 生成图片阶段 (Pollinations AI) ---
@@ -101,7 +103,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   }
 });
 
-app.get('/', (req, res) => {
+app.get('/', (_req: Request, res: Response) => {
   res.send('🍌 Nano Banana Multi-Model API 正在运行！');
 });
 
