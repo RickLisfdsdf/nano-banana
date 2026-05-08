@@ -109,6 +109,8 @@ app.get('/', (_req: Request, res: Response) => {
   res.send('🍌 Nano Banana Multi-Model API 正在运行！');
 });
 
-app.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+app.listen(Number(port), '0.0.0.0', () => {
+  console.log(`🚀 Nano Banana Backend is running!`);
+  console.log(`📡 Listening on: 0.0.0.0:${port}`);
+  console.log(`🛠️ Mode: ${process.env.NODE_ENV || 'development'}`);
 });
