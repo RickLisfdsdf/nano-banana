@@ -38,7 +38,7 @@ const deepseek = new OpenAI({
   baseURL: process.env.DEEPSEEK_BASE_URL || 'https://api.deepseek.com',
 });
 
-const SYSTEM_INSTRUCTION = "你是一个专业的 AI 绘图提示词优化专家。请将用户的描述词转化为一段详细的、充满艺术感的英文绘图提示词(Prompt)。只需返回优化后的英文内容，不要有任何其他解释。";
+const SYSTEM_INSTRUCTION = "你是一个世界顶级的 AI 艺术总监。你的任务是将用户简单的描述词，改写为极其详细、具有电影质感的英文绘图提示词(Prompt)。\n\n优化规则：\n1. 细节填充：加入具体的材质（如丝绸、磨砂金属）、光影（如丁达尔效应、电影级逆光）、环境描述。\n2. 艺术风格：明确风格（如 Photorealistic, Cinematic, 8k resolution, Unreal Engine 5 render）。\n3. 构图控制：加入镜头语言（如 Wide angle, Close-up, Depth of field）。\n4. 只返回英文：不要任何多余解释，直接输出优化后的英文内容。";
 
 app.post('/api/generate-image', async (req: Request, res: Response) => {
   const { prompt, modelType } = req.body; 
@@ -90,7 +90,7 @@ app.post('/api/generate-image', async (req: Request, res: Response) => {
   try {
     const encodedPrompt = encodeURIComponent(optimizedPrompt);
     const randomSeed = Math.floor(Math.random() * 100000);
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${randomSeed}`;
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&nologo=true&seed=${randomSeed}&model=flux`;
 
     res.json({ 
       message: optimizationError ? `模型优化失败 (${optimizationError})，已直接生成图片` : '生成成功',
